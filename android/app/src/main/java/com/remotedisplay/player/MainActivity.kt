@@ -630,6 +630,13 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     applyBackground(cached)
+                    // The native video-plane setting is deliberately omitted from trimmed offline
+                    // schedule states, but mergeOfflineState preserves it from this cached live
+                    // payload. Restore it before mounting items so a cached image-as-video variant
+                    // can play immediately without waiting for the server to resend the setting.
+                    if (::mediaPlayer.isInitialized) {
+                        mediaPlayer.setNativeVideo(cached.optBoolean("native_video", false))
+                    }
                     // #74/#75: restore the cached effective timezone too (offline schedules)
                     playlistController.setTimezone(if (cached.isNull("timezone")) null else cached.optString("timezone", "").ifEmpty { null })
                     // Standby content survives an offline cold-start too: the cached payload is the whole

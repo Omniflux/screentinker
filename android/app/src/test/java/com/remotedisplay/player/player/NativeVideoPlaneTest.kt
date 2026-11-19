@@ -41,4 +41,14 @@ class NativeVideoPlaneTest {
         assertTrue("it uses surface_view", xml.substring(native, end).contains("app:surface_type=\"surface_view\""))
         assertTrue("and starts hidden", xml.substring(native, end).contains("android:visibility=\"gone\""))
     }
+
+    @Test
+    fun cachedPlaylistRestoresNativeVideoBeforeStartingCachedItems() {
+        val source = File("src/main/java/com/remotedisplay/player/MainActivity.kt").readText()
+        val restore = source.indexOf("val cached = JSONObject(cachedJson)")
+        val setting = source.indexOf("mediaPlayer.setNativeVideo(cached.optBoolean(\"native_video\", false))", restore)
+        val playlistStart = source.indexOf("playlistController.updatePlaylist(assignments, cachedOrder)", restore)
+        assertTrue("cached native-video setting is restored", setting > restore)
+        assertTrue("setting is restored before cached items start", playlistStart < 0 || setting < playlistStart)
+    }
 }
