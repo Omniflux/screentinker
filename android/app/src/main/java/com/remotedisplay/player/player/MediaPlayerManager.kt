@@ -909,6 +909,7 @@ class MediaPlayerManager(
 
         exoPlayer?.apply {
             volume = if (mountMuted(muted)) 0f else 1f
+            repeatMode = if (videoLooping) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
             val item = MediaItem.fromUri(Uri.parse(url))
             if (url.startsWith("rtsp://", ignoreCase = true) || url.startsWith("rtsps://", ignoreCase = true)) {
                 // RTSP/RTSPS camera: TCP-interleaved, TLS for rtsps (RtspSources). A dead camera lands
@@ -1105,6 +1106,7 @@ class MediaPlayerManager(
         Log.i("MediaPlayerManager", "Playing ${if (audioCard != null) "audio" else "video"}: ${file.absolutePath} (muted=$muted)")
         exoPlayer?.apply {
             volume = if (mountMuted(muted)) 0f else 1f
+            repeatMode = if (videoLooping) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
             setMediaItem(MediaItem.fromUri(Uri.fromFile(file)))
             prepare()
             playWhenReady = true
