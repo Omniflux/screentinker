@@ -27,6 +27,7 @@ export function createInspector(host, opts) {
   let item = null;
   let draft = null;
   let usageReq = 0;
+  let imageStatusReq = 0;
   let opener = null;
   const mq = window.matchMedia(NARROW);
 
@@ -84,6 +85,8 @@ export function createInspector(host, opts) {
     const ty = typeOf(c);
     const st = statusOf(c);
     const writable = opts.canWrite();
+    const imageStatusRequest = ++imageStatusReq;
+    const hasImageAsVideoStatus = !c.remote_url && c.mime_type?.startsWith('image/');
     const rows = [
       [t('library.col.type'), ty.label + (ty.remote ? ` · ${t('library.inspector.linked')}` : '')],
       [t('library.col.duration'), durationOf(c)],
@@ -134,6 +137,7 @@ export function createInspector(host, opts) {
           </div>` : `<p class="lib-field-help">${esc(t('library.inspector.read_only'))}</p>`}
         </form>
         <dl class="lib-insp-facts">${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
+        ${hasImageAsVideoStatus ? `<p class="lib-field-help lib-insp-extended-data" data-image-as-video-status aria-live="polite"><strong>${esc(t('content.image_as_video.title'))}</strong> ${esc(t('common.loading'))}</p>` : ''}
         <section class="lib-insp-usage" aria-labelledby="libInspUsageTitle">
           <h3 id="libInspUsageTitle" class="lib-insp-sub">${esc(t('library.inspector.used_in'))}</h3>
           <div data-usage aria-live="polite">${esc(t('common.loading'))}</div>
@@ -149,6 +153,28 @@ export function createInspector(host, opts) {
     hydrateAuthImages(host);
     wire();
     loadUsage(c);
+    if (hasImageAsVideoStatus) loadImageAsVideoStatus(c, imageStatusRequest);
+  }
+
+  async function loadImageAsVideoStatus(c, requestId) {
+    const box = () => host.querySelector('[data-image-as-video-status]');
+    const show = (status) => {
+      if (requestId !== imageStatusReq || !box() || !item || item.id !== c.id) return;
+      const message = {
+        ready: t('content.image_as_video.ready'),
+        preparing: t('content.image_as_video.preparing'),
+        not_generated: t('content.image_as_video.not_generated'),
+        not_needed: t('content.image_as_video.not_needed'),
+        unavailable: t('content.image_as_video.unavailable'),
+      }[status] || t('content.image_as_video.unavailable');
+      box().innerHTML = `<strong>${esc(t('content.image_as_video.title'))}</strong> ${esc(message)}`;
+    };
+    try {
+      const status = await api.getContentImageAsVideoStatus(c.id);
+      show(status?.status);
+    } catch (_) {
+      show('unavailable');
+    }
   }
 
   function syncSaveRow() {

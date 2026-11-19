@@ -188,6 +188,7 @@
 .lib-insp-save .lib-field-help { margin-right: auto; color: var(--warning); }
 .lib-tag-add { display: flex; gap: 8px; margin-top: 8px; }
 .lib-tag-add .input { flex: 1; min-width: 0; height: 36px; }
+.lib-insp-extended-data { margin: 12px 0; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
 .lib-insp-facts { display: grid; gap: 6px; margin: 12px 0; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
 .lib-insp-facts div { display: grid; grid-template-columns: 112px 1fr; gap: 8px; font-size: 14px; }
 .lib-insp-facts dt { color: var(--text-secondary); }
